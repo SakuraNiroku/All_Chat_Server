@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="All_Chat.jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/All_Chat_jar</output-path>
+    <root id="archive" name="All_Chat.jar.jar">
+      <element id="module-output" name="All_Chat_Server" />
+      <element id="module-test-output" name="All_Chat_Server" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/mysql-connector-java-8.0.28.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/commons-codec-1.9.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/fastjson-1.2.83.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
