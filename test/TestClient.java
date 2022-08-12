@@ -20,7 +20,7 @@ public class TestClient {
             String a = scanner.nextLine();
             printStream.println(a);
         try {
-            Thread.sleep(10*1000);
+            Thread.sleep(3*1000);
             System.exit(0);
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -33,7 +33,7 @@ public class SocketThread extends Thread{
             }
         }else{
             try {
-                ResultSet resultSet = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+md5Hex(string)+"'");
+                ResultSet resultSet = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+string+"'");
                 if(resultSet.next()){
                     return true;
                 }
@@ -161,7 +161,7 @@ public class SocketThread extends Thread{
                         }else{
                             JSONObject jsonObject1fh = new JSONObject();
                             jsonObject1fh.put("reqtype","finish");
-                            jsonObject1fh.put("token",TokenModel.TokenUserTools(md5Hex(jsonObject.getString("user")),false));
+                            jsonObject1fh.put("token",TokenModel.TokenUserTools(jsonObject.getString("user"),false));
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
                         }
