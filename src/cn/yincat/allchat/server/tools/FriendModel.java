@@ -24,13 +24,14 @@ public class FriendModel {
 
     public static ArrayList<String> GetPreFriendList(String uuid){
         String username = TokenModel.TokenUserTools(uuid,true);
-        ArrayList<String> ret = new ArrayList<>();
+        ArrayList<String> ret = new ArrayList<String>();
         try {
             PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("select * from PreFriend where FriendName = ?");
             preparedStatement.setString(1,username);
             ResultSet r = preparedStatement.executeQuery();
             while(r.next()){
                 ret.add(r.getString("FriendName"));
+                
             }
         } catch (SQLException e) {
             e.printStackTrace();

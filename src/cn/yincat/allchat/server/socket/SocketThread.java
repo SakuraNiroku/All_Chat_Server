@@ -59,7 +59,7 @@ public class SocketThread extends Thread{
                 *   "password":"pass"
                 * }
                 *
-                *   Error User Found uf_err
+                *   Error User Found uff_err
                 *
                 *   Finish:
                 *   {
@@ -208,6 +208,7 @@ public class SocketThread extends Thread{
                         client_s.close();
                         break;
                     case "friendAccept":
+                        System.out.println(jsonObject.getString("token"));
                         if(!UserCheck(jsonObject.getString("token"),true)){
                             JSONObject jsonErr = new JSONObject();
                             jsonErr.put("reqtype","tke_err");
@@ -215,6 +216,7 @@ public class SocketThread extends Thread{
                             client_s.close();
                         }
                         ArrayList<String> PreFriendList = FriendModel.GetPreFriendList(jsonObject.getString("uuid"));
+                        System.out.println(PreFriendList);
                         if(!PreFriendList.contains(jsonObject.getString("user"))){
                             JSONObject jsonErr = new JSONObject();
                             jsonErr.put("reqtype","fnf_err");
@@ -222,8 +224,8 @@ public class SocketThread extends Thread{
                             client_s.close();
                         }
                         PreparedStatement preparedStatement2 = Var.mysqlVar.connection.prepareStatement("delete from PreFriend where Name = ? and FriendName = ?");
-                        preparedStatement2.setString(1, TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                        preparedStatement2.setString(2,jsonObject.getString("user"));
+                        preparedStatement2.setString(1,jsonObject.getString("user"));
+                        preparedStatement2.setString(2, TokenModel.TokenUserTools(jsonObject.getString("token"),true));
                         preparedStatement2.executeUpdate();
 
                         {
@@ -242,9 +244,22 @@ public class SocketThread extends Thread{
 
                         JSONObject jsonr1 = new JSONObject();
                         jsonr1.put("reqtype","finish");
-                        printStream.println(jsonr1);
+                        printStream.println(jsonr1.toJSONString());
                         client_s.close();
                         break;
+                    case "friendCancel":
+                        if(!UserCheck(jsonObject.getString("token"),true)){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","tke_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        if(!UserCheck(jsonObject.getString("user"),false)){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","fnf_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
                 }
 
 
@@ -255,6 +270,7 @@ public class SocketThread extends Thread{
             catch (Exception e){
                 e.printStackTrace();
             }
+
         }
     }
 }
