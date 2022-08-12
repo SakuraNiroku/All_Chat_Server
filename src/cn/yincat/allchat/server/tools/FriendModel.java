@@ -15,7 +15,7 @@ public class FriendModel {
         try {
             PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("insert into PreFriend values (?,?)");
             preparedStatement.setString(1,username);
-            preparedStatement.setString(2,md5Hex(FriendName));
+            preparedStatement.setString(2,FriendName);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

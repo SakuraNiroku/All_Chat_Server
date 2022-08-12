@@ -135,20 +135,10 @@ public class SocketThread extends Thread{
                             client_s.close();
                         }
                         PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("insert into user values (?,?,?)");
-                        preparedStatement.setString(1, md5Hex(jsonObject.getString("user")));
+                        preparedStatement.setString(1, jsonObject.getString("user"));
                         preparedStatement.setString(2,md5Hex(jsonObject.getString("password")));
                         preparedStatement.setString(3,UUID.randomUUID().toString());
                         preparedStatement.executeUpdate();
-//                        PreparedStatement preparedStatement1 = Var.mysqlVar.connection.prepareStatement("CREATE TABLE ? (\n" +
-//                                "  `uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" +
-//                                "  `chat_uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" +
-//                                "  PRIMARY KEY (`uuid`,`chat_uuid`),\n" +
-//                                "  KEY `usert_a_ibfk_2` (`chat_uuid`),\n" +
-//                                "  CONSTRAINT `usert_a_ibfk_1` FOREIGN KEY (`uuid`) REFERENCES `user` (`User`) ON DELETE CASCADE ON UPDATE CASCADE,\n" +
-//                                "  CONSTRAINT `usert_a_ibfk_2` FOREIGN KEY (`chat_uuid`) REFERENCES `cuuid` (`cuuid`) ON DELETE CASCADE ON UPDATE CASCADE\n" +
-//                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci");
-//                        preparedStatement1.setString(1,md5Hex(jsonObject.getString("user")));
-//                        preparedStatement1.execute();
                         JSONObject jsonObject1ret = new JSONObject();
                         jsonObject1ret.put("reqtype","finish");
                         printStream.println(jsonObject1ret.toJSONString());
@@ -156,7 +146,7 @@ public class SocketThread extends Thread{
                         break;
                     case "login":
                         //检测用户名
-                        ResultSet resultSetl = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+md5Hex(jsonObject.getString("user"))+"'");
+                        ResultSet resultSetl = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+ jsonObject.getString("user")+"'");
                         if(!resultSetl.next()){
                             JSONObject jsonObject1fh = new JSONObject();
                             jsonObject1fh.put("reqtype","unf_err");
@@ -202,7 +192,7 @@ public class SocketThread extends Thread{
 
                          qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from PreFriend where name = ? and friendName = ?");
                         qwerty1234.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                        qwerty1234.setString(2,md5Hex(jsonObject.getString("user")));
+                        qwerty1234.setString(2,jsonObject.getString("user"));
                         resultSetawdawdasdasdawa = qwerty1234.executeQuery();
                         if(resultSetawdawdasdasdawa.next()){
                             JSONObject jsonErr = new JSONObject();
@@ -225,7 +215,7 @@ public class SocketThread extends Thread{
                             client_s.close();
                         }
                         ArrayList<String> PreFriendList = FriendModel.GetPreFriendList(jsonObject.getString("uuid"));
-                        if(!PreFriendList.contains(md5Hex(jsonObject.getString("user")))){
+                        if(!PreFriendList.contains(jsonObject.getString("user"))){
                             JSONObject jsonErr = new JSONObject();
                             jsonErr.put("reqtype","fnf_err");
                             printStream.println(jsonErr.toJSONString());
@@ -233,19 +223,19 @@ public class SocketThread extends Thread{
                         }
                         PreparedStatement preparedStatement2 = Var.mysqlVar.connection.prepareStatement("delete from PreFriend where Name = ? and FriendName = ?");
                         preparedStatement2.setString(1, TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                        preparedStatement2.setString(2,md5Hex(jsonObject.getString("user")));
+                        preparedStatement2.setString(2,jsonObject.getString("user"));
                         preparedStatement2.executeUpdate();
 
                         {
                             PreparedStatement asaasawa = Var.mysqlVar.connection.prepareStatement("insert into Friend values (?,?)");
                             asaasawa.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                            asaasawa.setString(2,md5Hex(jsonObject.getString("user")));
+                            asaasawa.setString(2,jsonObject.getString("user"));
                             asaasawa.executeUpdate();
                         }
 
                         {
                             PreparedStatement asaasawa = Var.mysqlVar.connection.prepareStatement("insert into Friend values (?,?)");
-                            asaasawa.setString(1,md5Hex(jsonObject.getString("user")));
+                            asaasawa.setString(1,jsonObject.getString("user"));
                             asaasawa.setString(2,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
                             asaasawa.executeUpdate();
                         }

@@ -12,7 +12,7 @@ public class TokenModel {
 
                 ResultSet a = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where uuid = '"+string+"'");
                 if(a.next()){
-                    System.out.println(a.getString(1));
+                    //System.out.println(a.getString(1));
                     return a.getString(1);
                 }
             } catch (SQLException e) {
