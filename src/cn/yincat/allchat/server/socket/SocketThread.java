@@ -2,6 +2,7 @@ package cn.yincat.allchat.server.socket;
 
 import cn.yincat.allchat.server.Var;
 import cn.yincat.allchat.server.tools.FriendModel;
+import cn.yincat.allchat.server.tools.TokenModel;
 import com.alibaba.fastjson.JSONObject;
 import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 
@@ -11,6 +12,7 @@ import java.net.SocketException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class SocketThread extends Thread{
@@ -94,14 +96,28 @@ public class SocketThread extends Thread{
                 * {
                 *   "type":"friendAdd",
                 *   "token":"token(uuid)"
-                *   "user":"friendName"
+                *   "user":"preFriendName"
                 * }
                 *
                 * Error 1. Token Error (tke_err)
                 *
                 * Error 2. FriendName Not Found (fnf_err)
                 *
+                * Error 3. Friend Found (fff_err)
+                *
                 * Finish (finish)
+                * */
+
+                /*
+                * {
+                *   "type":"friendAccept",
+                *   "token":"token(uuid)",
+                *   "user":"preFriendName"
+                * }
+                *
+                * Error 1.Token Err (tke_err)
+                * Error 2.FriendName Not Found(fnf_err)
+                * finish(finish)
                 * */
 
                 DataInputStream dataInputStream = new DataInputStream(client_s.getInputStream());
@@ -123,16 +139,16 @@ public class SocketThread extends Thread{
                         preparedStatement.setString(2,md5Hex(jsonObject.getString("password")));
                         preparedStatement.setString(3,UUID.randomUUID().toString());
                         preparedStatement.executeUpdate();
-                        PreparedStatement preparedStatement1 = Var.mysqlVar.connection.prepareStatement("CREATE TABLE ? (\n" +
-                                "  `uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" +
-                                "  `chat_uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" +
-                                "  PRIMARY KEY (`uuid`,`chat_uuid`),\n" +
-                                "  KEY `usert_a_ibfk_2` (`chat_uuid`),\n" +
-                                "  CONSTRAINT `usert_a_ibfk_1` FOREIGN KEY (`uuid`) REFERENCES `user` (`User`) ON DELETE CASCADE ON UPDATE CASCADE,\n" +
-                                "  CONSTRAINT `usert_a_ibfk_2` FOREIGN KEY (`chat_uuid`) REFERENCES `cuuid` (`cuuid`) ON DELETE CASCADE ON UPDATE CASCADE\n" +
-                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci");
-                        preparedStatement1.setString(1,md5Hex(jsonObject.getString("user")));
-                        preparedStatement1.execute();
+//                        PreparedStatement preparedStatement1 = Var.mysqlVar.connection.prepareStatement("CREATE TABLE ? (\n" +
+//                                "  `uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" +
+//                                "  `chat_uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" +
+//                                "  PRIMARY KEY (`uuid`,`chat_uuid`),\n" +
+//                                "  KEY `usert_a_ibfk_2` (`chat_uuid`),\n" +
+//                                "  CONSTRAINT `usert_a_ibfk_1` FOREIGN KEY (`uuid`) REFERENCES `user` (`User`) ON DELETE CASCADE ON UPDATE CASCADE,\n" +
+//                                "  CONSTRAINT `usert_a_ibfk_2` FOREIGN KEY (`chat_uuid`) REFERENCES `cuuid` (`cuuid`) ON DELETE CASCADE ON UPDATE CASCADE\n" +
+//                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci");
+//                        preparedStatement1.setString(1,md5Hex(jsonObject.getString("user")));
+//                        preparedStatement1.execute();
                         JSONObject jsonObject1ret = new JSONObject();
                         jsonObject1ret.put("reqtype","finish");
                         printStream.println(jsonObject1ret.toJSONString());
@@ -172,9 +188,60 @@ public class SocketThread extends Thread{
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
+                        PreparedStatement qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from Friend where user = ? and friendUser = ?");
+                        qwerty1234.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
+                        qwerty1234.setString(2,md5Hex(jsonObject.getString("user")));
+                        ResultSet resultSetawdawdasdasdawa = qwerty1234.executeQuery();
+                        if(resultSetawdawdasdasdawa.next()){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","fff_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
                         FriendModel.FriendAdd(jsonObject.getString("token"),jsonObject.getString("user"));
+                        JSONObject jsonr = new JSONObject();
+                        jsonr.put("reqtype","finish");
+                        printStream.println(jsonr.toJSONString());
+                        client_s.close();
                         break;
+                    case "friendAccept":
+                        if(!UserCheck(jsonObject.getString("token"),true)){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","tke_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        ArrayList<String> PreFriendList = FriendModel.GetPreFriendList(jsonObject.getString("uuid"));
+                        if(!PreFriendList.contains(md5Hex(jsonObject.getString("user")))){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","fnf_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        PreparedStatement preparedStatement2 = Var.mysqlVar.connection.prepareStatement("delete from PreFriend where Name = ? and FriendName = ?");
+                        preparedStatement2.setString(1, TokenModel.TokenUserTools(jsonObject.getString("token"),true));
+                        preparedStatement2.setString(2,md5Hex(jsonObject.getString("user")));
+                        preparedStatement2.executeUpdate();
 
+                        {
+                            PreparedStatement asaasawa = Var.mysqlVar.connection.prepareStatement("insert into Friend values (?,?)");
+                            asaasawa.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
+                            asaasawa.setString(2,md5Hex(jsonObject.getString("user")));
+                            asaasawa.executeUpdate();
+                        }
+
+                        {
+                            PreparedStatement asaasawa = Var.mysqlVar.connection.prepareStatement("insert into Friend values (?,?)");
+                            asaasawa.setString(1,md5Hex(jsonObject.getString("user")));
+                            asaasawa.setString(2,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
+                            asaasawa.executeUpdate();
+                        }
+
+                        JSONObject jsonr1 = new JSONObject();
+                        jsonr1.put("reqtype","finish");
+                        printStream.println(jsonr1);
+                        client_s.close();
+                        break;
                 }
 
 
