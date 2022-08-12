@@ -26,7 +26,7 @@ public class FriendModel {
         String username = TokenModel.TokenUserTools(uuid,true);
         ArrayList<String> ret = new ArrayList<>();
         try {
-            PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("select FriendName from PreFriend where Name = ?");
+            PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("select * from PreFriend where FriendName = ?");
             preparedStatement.setString(1,username);
             ResultSet r = preparedStatement.executeQuery();
             while(r.next()){

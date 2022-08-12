@@ -171,6 +171,7 @@ public class SocketThread extends Thread{
                         }else{
                             JSONObject jsonObject1fh = new JSONObject();
                             jsonObject1fh.put("reqtype","finish");
+                            jsonObject1fh.put("token",TokenModel.TokenUserTools(md5Hex(jsonObject.getString("user")),false));
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
                         }
@@ -198,6 +199,18 @@ public class SocketThread extends Thread{
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
+
+                         qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from PreFriend where name = ? and friendName = ?");
+                        qwerty1234.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
+                        qwerty1234.setString(2,md5Hex(jsonObject.getString("user")));
+                        resultSetawdawdasdasdawa = qwerty1234.executeQuery();
+                        if(resultSetawdawdasdasdawa.next()){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","fff_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+
                         FriendModel.FriendAdd(jsonObject.getString("token"),jsonObject.getString("user"));
                         JSONObject jsonr = new JSONObject();
                         jsonr.put("reqtype","finish");

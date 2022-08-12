@@ -9,16 +9,18 @@ public class TokenModel {
     public static String TokenUserTools(String string,boolean tokenToUser){
         if(tokenToUser){
             try {
-                ResultSet a = Var.mysqlVar.connection.createStatement().executeQuery("select User from where uuid = '"+string+"'");
+
+                ResultSet a = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where uuid = '"+string+"'");
                 if(a.next()){
-                    return a.getString("User");
+                    System.out.println(a.getString(1));
+                    return a.getString(1);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }else{
             try {
-                ResultSet a = Var.mysqlVar.connection.createStatement().executeQuery("select uuid from where User = '"+string+"'");
+                ResultSet a = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+string+"'");
                 if(a.next()){
                     return a.getString("uuid");
                 }
