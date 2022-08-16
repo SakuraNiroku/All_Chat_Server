@@ -3,6 +3,7 @@ package cn.yincat.allchat.server.socket;
 import cn.yincat.allchat.server.Var;
 import cn.yincat.allchat.server.tools.FriendModel;
 import cn.yincat.allchat.server.tools.TokenModel;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 
@@ -237,7 +238,9 @@ public class SocketThread extends Thread{
                         }
                         JSONObject jsonObject1 = new JSONObject();
                         jsonObject1.put("reqtype","finish");
-                        jsonObject1.put("friends",FriendModel.FriendList(jsonObject1.getString("token")));
+                        JSONArray jsonArray = FriendModel.FriendList(jsonObject.getString("token"));
+                        //System.out.println(jsonArray);
+                        jsonObject1.put("friends",jsonArray);
                         printStream.println(jsonObject1.toJSONString());
                         break;
                 }
