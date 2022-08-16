@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 
+//代码无注释，自己看awa
+@SuppressWarnings("all")
 public class SocketThread extends Thread{
     Socket client_s;
     public SocketThread(Socket cilent_s){
@@ -44,6 +46,17 @@ public class SocketThread extends Thread{
         return false;
     }
 
+    public void Finish(PrintStream printStream,Socket socket){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("reqtype","finish");
+        printStream.println(jsonObject.toJSONString());
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         while(true){
@@ -51,75 +64,6 @@ public class SocketThread extends Thread{
                 if(client_s.isClosed()){
                     break;
                 }
-
-                /*
-                * {
-                *   "type":"register",
-                *   "user":"a",
-                *   "password":"pass"
-                * }
-                *
-                *   Error User Found uff_err
-                *
-                *   Finish:
-                *   {
-                *       "reqtype":"finish"
-                *   }
-                * */
-
-                /*
-                * {
-                *   "type":"login",
-                *   "user":"a",
-                *   "password":"pass"
-                * }
-                *
-                *   Error 1.User Not Fount
-                *  {
-                *   "reqtype":"unf_err"
-                *  }
-                *
-                *   Error 2.Password Not Right
-                * {
-                *   "reqtype":"pnr_err"
-                * }
-                *
-                * Finish
-                * {
-                *   "reqtype":"finish",
-                *   "token":"token(uuid)"
-                * */
-
-                //Friend System
-
-                /*
-                * {
-                *   "type":"friendAdd",
-                *   "token":"token(uuid)"
-                *   "user":"preFriendName"
-                * }
-                *
-                * Error 1. Token Error (tke_err)
-                *
-                * Error 2. FriendName Not Found (fnf_err)
-                *
-                * Error 3. Friend Found (fff_err)
-                *
-                * Finish (finish)
-                * */
-
-                /*
-                * {
-                *   "type":"friendAccept",
-                *   "token":"token(uuid)",
-                *   "user":"preFriendName"
-                * }
-                *
-                * Error 1.Token Err (tke_err)
-                * Error 2.FriendName Not Found(fnf_err)
-                * finish(finish)
-                * */
-
                 DataInputStream dataInputStream = new DataInputStream(client_s.getInputStream());
                 PrintStream printStream = new PrintStream(client_s.getOutputStream());
 
@@ -127,7 +71,7 @@ public class SocketThread extends Thread{
 
                 switch (jsonObject.getString("type")){
                     case "register":
-                        //检测用户名
+
                         if(UserCheck(md5Hex(jsonObject.getString("user")),false)){
                             JSONObject jsonObject1fh = new JSONObject();
                             jsonObject1fh.put("reqtype","uf_err");
@@ -139,10 +83,8 @@ public class SocketThread extends Thread{
                         preparedStatement.setString(2,md5Hex(jsonObject.getString("password")));
                         preparedStatement.setString(3,UUID.randomUUID().toString());
                         preparedStatement.executeUpdate();
-                        JSONObject jsonObject1ret = new JSONObject();
-                        jsonObject1ret.put("reqtype","finish");
-                        printStream.println(jsonObject1ret.toJSONString());
-                        client_s.close();
+                        Finish(printStream,client_s);
+
                         break;
                     case "login":
                         //检测用户名
@@ -202,10 +144,7 @@ public class SocketThread extends Thread{
                         }
 
                         FriendModel.FriendAdd(jsonObject.getString("token"),jsonObject.getString("user"));
-                        JSONObject jsonr = new JSONObject();
-                        jsonr.put("reqtype","finish");
-                        printStream.println(jsonr.toJSONString());
-                        client_s.close();
+                        Finish(printStream,client_s);
                         break;
                     case "friendAccept":
                         System.out.println(jsonObject.getString("token"));
@@ -223,29 +162,10 @@ public class SocketThread extends Thread{
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        PreparedStatement preparedStatement2 = Var.mysqlVar.connection.prepareStatement("delete from PreFriend where Name = ? and FriendName = ?");
-                        preparedStatement2.setString(1,jsonObject.getString("user"));
-                        preparedStatement2.setString(2, TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                        preparedStatement2.executeUpdate();
 
-                        {
-                            PreparedStatement asaasawa = Var.mysqlVar.connection.prepareStatement("insert into Friend values (?,?)");
-                            asaasawa.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                            asaasawa.setString(2,jsonObject.getString("user"));
-                            asaasawa.executeUpdate();
-                        }
+                        FriendModel.FriendAccept(jsonObject.getString("uuid"),jsonObject.getString("user"));
 
-                        {
-                            PreparedStatement asaasawa = Var.mysqlVar.connection.prepareStatement("insert into Friend values (?,?)");
-                            asaasawa.setString(1,jsonObject.getString("user"));
-                            asaasawa.setString(2,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                            asaasawa.executeUpdate();
-                        }
-
-                        JSONObject jsonr1 = new JSONObject();
-                        jsonr1.put("reqtype","finish");
-                        printStream.println(jsonr1.toJSONString());
-                        client_s.close();
+                        Finish(printStream,client_s);
                         break;
                     case "friendCancel":
                         if(!UserCheck(jsonObject.getString("token"),true)){
@@ -260,6 +180,48 @@ public class SocketThread extends Thread{
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
+                        FriendModel.FriendCancel(jsonObject.getString("uuid"),jsonObject.getString("user"));
+                        Finish(printStream,client_s);
+                        break;
+                    case "friendDel":
+                        if(!UserCheck(jsonObject.getString("token"),true)){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","tke_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        if(!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","unf_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        FriendModel.FriendDel(jsonObject.getString("token"),jsonObject.getString("user"));
+                        Finish(printStream,client_s);
+                        break;
+                    case "friendChat":
+                        if(!UserCheck(jsonObject.getString("token"),true)){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","tke_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        if(!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","unf_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        Finish(printStream,client_s);
+                        break;
+                    case "getAllFriendMsg":
+                        if(!UserCheck(jsonObject.getString("token"),true)){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","tke_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+
                 }
 
 
