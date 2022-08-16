@@ -212,6 +212,7 @@ public class SocketThread extends Thread{
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
+                        FriendModel.FriendChat(jsonObject.getString("token"),jsonObject.getString("user"),jsonObject.getString("msg"));
                         Finish(printStream,client_s);
                         break;
                     case "getAllFriendMsg":
@@ -226,9 +227,20 @@ public class SocketThread extends Thread{
                         et.put("msgs",FriendModel.GetAllFriendMsg(jsonObject.getString("token")));
                         printStream.println(et.toJSONString());
                         client_s.close();
+                        break;
+                    case "friendList":
+                        if(!UserCheck(jsonObject.getString("token"),true)){
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype","tke_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        JSONObject jsonObject1 = new JSONObject();
+                        jsonObject1.put("reqtype","finish");
+                        jsonObject1.put("friends",FriendModel.FriendList(jsonObject1.getString("token")));
+                        printStream.println(jsonObject1.toJSONString());
+                        break;
                 }
-
-
             }catch (SocketException e){
                 e.printStackTrace();
                 return;

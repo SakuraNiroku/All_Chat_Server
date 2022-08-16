@@ -153,4 +153,22 @@ public class FriendModel {
         }
         return jsonArray;
     }
+
+    public static JSONArray FriendList(String uuid){
+        String username = TokenModel.TokenUserTools(uuid,true);
+        JSONArray objects = new JSONArray();
+        try {
+            PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("select * from Friend where friendUser = ?");
+            preparedStatement.setString(1,username);
+            ResultSet r = preparedStatement.executeQuery();
+            while(r.next()){
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("user",r.getString("user"));
+                objects.add(jsonObject);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return objects;
+    }
 }
