@@ -70,179 +70,198 @@ public class SocketThread extends Thread{
 
                 JSONObject jsonObject = JSONObject.parseObject(dataInputStream.readLine());
 
-                switch (jsonObject.getString("type")){
+                switch (jsonObject.getString("type")) {
                     case "register":
 
-                        if(UserCheck(md5Hex(jsonObject.getString("user")),false)){
+                        if (UserCheck(md5Hex(jsonObject.getString("user")), false)) {
                             JSONObject jsonObject1fh = new JSONObject();
-                            jsonObject1fh.put("reqtype","uf_err");
+                            jsonObject1fh.put("reqtype", "uf_err");
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
                         }
                         PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("insert into user values (?,?,?)");
                         preparedStatement.setString(1, jsonObject.getString("user"));
-                        preparedStatement.setString(2,md5Hex(jsonObject.getString("password")));
-                        preparedStatement.setString(3,UUID.randomUUID().toString());
+                        preparedStatement.setString(2, md5Hex(jsonObject.getString("password")));
+                        preparedStatement.setString(3, UUID.randomUUID().toString());
                         preparedStatement.executeUpdate();
-                        Finish(printStream,client_s);
+                        Finish(printStream, client_s);
 
                         break;
                     case "login":
                         //检测用户名
-                        ResultSet resultSetl = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+ jsonObject.getString("user")+"'");
-                        if(!resultSetl.next()){
+                        ResultSet resultSetl = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '" + jsonObject.getString("user") + "'");
+                        if (!resultSetl.next()) {
                             JSONObject jsonObject1fh = new JSONObject();
-                            jsonObject1fh.put("reqtype","unf_err");
+                            jsonObject1fh.put("reqtype", "unf_err");
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
                         }
-                        if(!resultSetl.getString("PasswordJ").equals(md5Hex(jsonObject.getString("password")))){
+                        if (!resultSetl.getString("PasswordJ").equals(md5Hex(jsonObject.getString("password")))) {
                             JSONObject jsonObject1fh = new JSONObject();
-                            jsonObject1fh.put("reqtype","pnr_err");
+                            jsonObject1fh.put("reqtype", "pnr_err");
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
-                        }else{
+                        } else {
                             JSONObject jsonObject1fh = new JSONObject();
-                            jsonObject1fh.put("reqtype","finish");
-                            jsonObject1fh.put("token",TokenModel.TokenUserTools(jsonObject.getString("user"),false));
+                            jsonObject1fh.put("reqtype", "finish");
+                            jsonObject1fh.put("token", TokenModel.TokenUserTools(jsonObject.getString("user"), false));
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
                         }
                         break;
                     case "friendAdd":
-                        if(!UserCheck(jsonObject.getString("token"),true)){
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","tke_err");
+                            jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        if(!UserCheck(jsonObject.getString("user"),false)){
+                        if (!UserCheck(jsonObject.getString("user"), false)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","fnf_err");
+                            jsonErr.put("reqtype", "fnf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
                         PreparedStatement qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from Friend where user = ? and friendUser = ?");
-                        qwerty1234.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                        qwerty1234.setString(2,md5Hex(jsonObject.getString("user")));
+                        qwerty1234.setString(1, TokenModel.TokenUserTools(jsonObject.getString("token"), true));
+                        qwerty1234.setString(2, md5Hex(jsonObject.getString("user")));
                         ResultSet resultSetawdawdasdasdawa = qwerty1234.executeQuery();
-                        if(resultSetawdawdasdasdawa.next()){
+                        if (resultSetawdawdasdasdawa.next()) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","fff_err");
+                            jsonErr.put("reqtype", "fff_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
 
-                         qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from PreFriend where name = ? and friendName = ?");
-                        qwerty1234.setString(1,TokenModel.TokenUserTools(jsonObject.getString("token"),true));
-                        qwerty1234.setString(2,jsonObject.getString("user"));
+                        qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from PreFriend where name = ? and friendName = ?");
+                        qwerty1234.setString(1, TokenModel.TokenUserTools(jsonObject.getString("token"), true));
+                        qwerty1234.setString(2, jsonObject.getString("user"));
                         resultSetawdawdasdasdawa = qwerty1234.executeQuery();
-                        if(resultSetawdawdasdasdawa.next()){
+                        if (resultSetawdawdasdasdawa.next()) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","fff_err");
+                            jsonErr.put("reqtype", "fff_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
 
-                        FriendModel.FriendAdd(jsonObject.getString("token"),jsonObject.getString("user"));
-                        Finish(printStream,client_s);
+                        FriendModel.FriendAdd(jsonObject.getString("token"), jsonObject.getString("user"));
+                        Finish(printStream, client_s);
                         break;
                     case "friendAccept":
                         System.out.println(jsonObject.getString("token"));
-                        if(!UserCheck(jsonObject.getString("token"),true)){
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","tke_err");
+                            jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
                         ArrayList<String> PreFriendList = FriendModel.GetPreFriendList(jsonObject.getString("uuid"));
                         System.out.println(PreFriendList);
-                        if(!PreFriendList.contains(jsonObject.getString("user"))){
+                        if (!PreFriendList.contains(jsonObject.getString("user"))) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","fnf_err");
+                            jsonErr.put("reqtype", "fnf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
 
-                        FriendModel.FriendAccept(jsonObject.getString("uuid"),jsonObject.getString("user"));
+                        FriendModel.FriendAccept(jsonObject.getString("uuid"), jsonObject.getString("user"));
 
-                        Finish(printStream,client_s);
+                        Finish(printStream, client_s);
                         break;
                     case "friendCancel":
-                        if(!UserCheck(jsonObject.getString("token"),true)){
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","tke_err");
+                            jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        if(!UserCheck(jsonObject.getString("user"),false)){
+                        if (!UserCheck(jsonObject.getString("user"), false)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","fnf_err");
+                            jsonErr.put("reqtype", "fnf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        FriendModel.FriendCancel(jsonObject.getString("uuid"),jsonObject.getString("user"));
-                        Finish(printStream,client_s);
+                        FriendModel.FriendCancel(jsonObject.getString("uuid"), jsonObject.getString("user"));
+                        Finish(printStream, client_s);
                         break;
                     case "friendDel":
-                        if(!UserCheck(jsonObject.getString("token"),true)){
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","tke_err");
+                            jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        if(!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))){
+                        if (!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","unf_err");
+                            jsonErr.put("reqtype", "unf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        FriendModel.FriendDel(jsonObject.getString("token"),jsonObject.getString("user"));
-                        Finish(printStream,client_s);
+                        FriendModel.FriendDel(jsonObject.getString("token"), jsonObject.getString("user"));
+                        Finish(printStream, client_s);
                         break;
                     case "friendChat":
-                        if(!UserCheck(jsonObject.getString("token"),true)){
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","tke_err");
+                            jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        if(!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))){
+                        if (!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","unf_err");
+                            jsonErr.put("reqtype", "unf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-                        FriendModel.FriendChat(jsonObject.getString("token"),jsonObject.getString("user"),jsonObject.getString("msg"));
-                        Finish(printStream,client_s);
+                        FriendModel.FriendChat(jsonObject.getString("token"), jsonObject.getString("user"), jsonObject.getString("msg"));
+                        Finish(printStream, client_s);
                         break;
                     case "getAllFriendMsg":
-                        if(!UserCheck(jsonObject.getString("token"),true)){
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","tke_err");
+                            jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
                         JSONObject et = new JSONObject();
-                        et.put("reqtype","finish");
-                        et.put("msgs",FriendModel.GetAllFriendMsg(jsonObject.getString("token")));
+                        et.put("reqtype", "finish");
+                        et.put("msgs", FriendModel.GetAllFriendMsg(jsonObject.getString("token")));
                         printStream.println(et.toJSONString());
                         client_s.close();
                         break;
                     case "friendList":
-                        if(!UserCheck(jsonObject.getString("token"),true)){
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype","tke_err");
+                            jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
                         JSONObject jsonObject1 = new JSONObject();
-                        jsonObject1.put("reqtype","finish");
+                        jsonObject1.put("reqtype", "finish");
                         JSONArray jsonArray = FriendModel.FriendList(jsonObject.getString("token"));
                         //System.out.println(jsonArray);
-                        jsonObject1.put("friends",jsonArray);
+                        jsonObject1.put("friends", jsonArray);
                         printStream.println(jsonObject1.toJSONString());
                         break;
+                    case "preFriendList":
+                        if (!UserCheck(jsonObject.getString("token"), true)) {
+                            JSONObject jsonErr = new JSONObject();
+                            jsonErr.put("reqtype", "tke_err");
+                            printStream.println(jsonErr.toJSONString());
+                            client_s.close();
+                        }
+                        JSONObject jsonObject12 = new JSONObject();
+                        jsonObject12.put("reqtype", "finish");
+                        ArrayList<String> jsonArray2 = FriendModel.GetPreFriendList(jsonObject.getString("token"));
+                        JSONArray array = new JSONArray();
+                        for (String s : jsonArray2) {
+                            JSONObject a = new JSONObject();
+                            a.put("user",s);
+                        }
+
+                        //System.out.println(jsonArray);
+                        jsonObject12.put("Prefriends",array.toJSONString());
+                        printStream.println(jsonObject12.toJSONString());
                 }
             }catch (SocketException e){
                 e.printStackTrace();
