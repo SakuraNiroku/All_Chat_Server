@@ -221,7 +221,11 @@ public class SocketThread extends Thread{
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                         }
-
+                        JSONObject et = new JSONObject();
+                        et.put("reqtype","finish");
+                        et.put("msgs",FriendModel.GetAllFriendMsg(jsonObject.getString("token")));
+                        printStream.println(et.toJSONString());
+                        client_s.close();
                 }
 
 
