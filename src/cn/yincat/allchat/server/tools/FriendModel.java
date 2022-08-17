@@ -122,6 +122,7 @@ public class FriendModel {
             preparedStatement.setString(2,username);
             preparedStatement.setString(3,user);
             preparedStatement.setString(4,msg);
+            preparedStatement.executeUpdate();
         }catch (Exception e){
             e.printStackTrace();
         }
