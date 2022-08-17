@@ -34,7 +34,7 @@ public class FriendModel {
             preparedStatement.setString(1,username);
             ResultSet r = preparedStatement.executeQuery();
             while(r.next()){
-                ret.add(r.getString("FriendName"));
+                ret.add(r.getString("Name"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

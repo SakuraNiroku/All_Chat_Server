@@ -123,7 +123,7 @@ public class SocketThread extends Thread{
                         }
                         if (!UserCheck(jsonObject.getString("user"), false)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype", "fnf_err");
+                            jsonErr.put("reqtype", "unf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                             return;
@@ -164,7 +164,7 @@ public class SocketThread extends Thread{
                             client_s.close();
                             return;
                         }
-                        ArrayList<String> PreFriendList = FriendModel.GetPreFriendList(jsonObject.getString("uuid"));
+                        ArrayList<String> PreFriendList = FriendModel.GetPreFriendList(jsonObject.getString("token"));
                         System.out.println(PreFriendList);
                         if (!PreFriendList.contains(jsonObject.getString("user"))) {
                             JSONObject jsonErr = new JSONObject();
@@ -188,7 +188,7 @@ public class SocketThread extends Thread{
                         }
                         if (!UserCheck(jsonObject.getString("user"), false)) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype", "fnf_err");
+                            jsonErr.put("reqtype", "unf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                             return;
@@ -274,6 +274,7 @@ public class SocketThread extends Thread{
                         for (String s : jsonArray2) {
                             JSONObject a = new JSONObject();
                             a.put("user",s);
+                            array.add(a);
                         }
 
                         //System.out.println(jsonArray);
