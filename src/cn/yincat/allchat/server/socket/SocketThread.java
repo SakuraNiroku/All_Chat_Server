@@ -38,7 +38,7 @@ public class SocketThread extends Thread{
             try {
                 ResultSet resultSet = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+string+"'");
                 if(resultSet.next()){
-                    System.out.println(true);
+                    //System.out.println(true);
                     return true;
                 }
             } catch (SQLException e) {
@@ -168,7 +168,7 @@ public class SocketThread extends Thread{
                         System.out.println(PreFriendList);
                         if (!PreFriendList.contains(jsonObject.getString("user"))) {
                             JSONObject jsonErr = new JSONObject();
-                            jsonErr.put("reqtype", "fnf_err");
+                            jsonErr.put("reqtype", "unf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
                             return;
