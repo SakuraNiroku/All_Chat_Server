@@ -38,6 +38,7 @@ public class SocketThread extends Thread{
             try {
                 ResultSet resultSet = Var.mysqlVar.connection.createStatement().executeQuery("select * from user where User = '"+string+"'");
                 if(resultSet.next()){
+                    System.out.println(true);
                     return true;
                 }
             } catch (SQLException e) {
@@ -78,6 +79,7 @@ public class SocketThread extends Thread{
                             jsonObject1fh.put("reqtype", "uf_err");
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
+                            return;
                         }
                         PreparedStatement preparedStatement = Var.mysqlVar.connection.prepareStatement("insert into user values (?,?,?)");
                         preparedStatement.setString(1, jsonObject.getString("user"));
@@ -95,12 +97,14 @@ public class SocketThread extends Thread{
                             jsonObject1fh.put("reqtype", "unf_err");
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
+                            return;
                         }
                         if (!resultSetl.getString("PasswordJ").equals(md5Hex(jsonObject.getString("password")))) {
                             JSONObject jsonObject1fh = new JSONObject();
                             jsonObject1fh.put("reqtype", "pnr_err");
                             printStream.println(jsonObject1fh.toJSONString());
                             client_s.close();
+                            return;
                         } else {
                             JSONObject jsonObject1fh = new JSONObject();
                             jsonObject1fh.put("reqtype", "finish");
@@ -115,12 +119,14 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         if (!UserCheck(jsonObject.getString("user"), false)) {
                             JSONObject jsonErr = new JSONObject();
                             jsonErr.put("reqtype", "fnf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         PreparedStatement qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from Friend where user = ? and friendUser = ?");
                         qwerty1234.setString(1, TokenModel.TokenUserTools(jsonObject.getString("token"), true));
@@ -131,6 +137,7 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "fff_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
 
                         qwerty1234 = Var.mysqlVar.connection.prepareStatement("select * from PreFriend where name = ? and friendName = ?");
@@ -142,6 +149,7 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "fff_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
 
                         FriendModel.FriendAdd(jsonObject.getString("token"), jsonObject.getString("user"));
@@ -154,6 +162,7 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         ArrayList<String> PreFriendList = FriendModel.GetPreFriendList(jsonObject.getString("uuid"));
                         System.out.println(PreFriendList);
@@ -162,6 +171,7 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "fnf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
 
                         FriendModel.FriendAccept(jsonObject.getString("uuid"), jsonObject.getString("user"));
@@ -174,12 +184,14 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         if (!UserCheck(jsonObject.getString("user"), false)) {
                             JSONObject jsonErr = new JSONObject();
                             jsonErr.put("reqtype", "fnf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         FriendModel.FriendCancel(jsonObject.getString("uuid"), jsonObject.getString("user"));
                         Finish(printStream, client_s);
@@ -190,12 +202,14 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         if (!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))) {
                             JSONObject jsonErr = new JSONObject();
                             jsonErr.put("reqtype", "unf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         FriendModel.FriendDel(jsonObject.getString("token"), jsonObject.getString("user"));
                         Finish(printStream, client_s);
@@ -206,12 +220,14 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         if (!FriendModel.GetFriendList(jsonObject.getString("token")).contains(jsonObject.getString("user"))) {
                             JSONObject jsonErr = new JSONObject();
                             jsonErr.put("reqtype", "unf_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         FriendModel.FriendChat(jsonObject.getString("token"), jsonObject.getString("user"), jsonObject.getString("msg"));
                         Finish(printStream, client_s);
@@ -222,6 +238,7 @@ public class SocketThread extends Thread{
                             jsonErr.put("reqtype", "tke_err");
                             printStream.println(jsonErr.toJSONString());
                             client_s.close();
+                            return;
                         }
                         JSONObject et = new JSONObject();
                         et.put("reqtype", "finish");
