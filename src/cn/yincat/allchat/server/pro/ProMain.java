@@ -20,7 +20,7 @@ public class ProMain {
         }
         /*2、数据库连接配置*/
         Var.mysqlVar.url = PassMy.url; //防偷看 awa
-        Var.mysqlVar.database = "allchat";
+        Var.mysqlVar.database = "allchat"+"?autoReconnect=true";
         Var.mysqlVar.user = PassMy.d;
         Var.mysqlVar.password = PassMy.pass;
         /*3、连接数据库*/

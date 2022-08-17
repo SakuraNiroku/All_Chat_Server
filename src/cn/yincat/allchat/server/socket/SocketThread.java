@@ -174,7 +174,7 @@ public class SocketThread extends Thread{
                             return;
                         }
 
-                        FriendModel.FriendAccept(jsonObject.getString("uuid"), jsonObject.getString("user"));
+                        FriendModel.FriendAccept(jsonObject.getString("token"), jsonObject.getString("user"));
 
                         Finish(printStream, client_s);
                         break;
